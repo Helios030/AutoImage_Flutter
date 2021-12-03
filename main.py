@@ -29,7 +29,7 @@ def get_last_line(inputfile):
         maxseekpoint -= 1
         dat_file.seek(maxseekpoint * blocksize)
         lines = dat_file.readlines()
-        while ((len(lines) < 2) | ((len(lines) >= 2) & (lines[1] == b'\r\n'))):  # 因为在Windows下，所以是b'\r\n'
+        while (len(lines) < 2) | ((len(lines) >= 2) & (lines[1] == b'\r\n')):  # 因为在Windows下，所以是b'\r\n'
             # 如果列表长度小于2，或者虽然长度大于等于2，但第二个元素却还是空行
             # 如果跳出循环，那么lines长度大于等于2，且第二个元素肯定是完整的行
             maxseekpoint -= 1
@@ -45,6 +45,17 @@ def get_last_line(inputfile):
                 break  # 已经找到最后一个不是空行的
     dat_file.close()
     return last_line
+
+def createR(name):
+    imgName = name.split(".")[0]
+    rfile.write("var  n" + imgName + "= AssetImage(\"assets/images/" + name + "\");\n")
+    with open(yamiuri, 'a+') as f:
+        lastline = get_last_line(yamiuri)
+        if (str(lastline).__contains__("uses-material-design")):
+            f.write("\nassets:")
+            f.write("\n    - assets/images/" + name)
+        else:
+            f.write("\n    - assets/images/" + name)
 
 
 def addImage(answerDir):
@@ -67,14 +78,7 @@ def addImage(answerDir):
             shutil.copy(os.path.join(unzipDir, name + "@3x.png"), os.path.join(imgDir3, allFileName))
             print("文件复制完成")
             print("开始写入yaml。。。")
-            rfile.write("String n" + allFileName.split(".")[0] + "= \"assets/images/" + allFileName + "\";\n")
-            with open(yamiuri, 'a+') as f:
-                lastline = get_last_line(yamiuri)
-                if (str(lastline).__contains__("uses-material-design")):
-                    f.write("\nassets:")
-                    f.write("\n - assets/images/" + allFileName)
-                else:
-                    f.write("\n - assets/images/" + allFileName)
+            createR(allFileName)
             print("yaml写入完毕")
     print("图片添加完毕！")
     print("删除文件中。。。")
@@ -114,8 +118,7 @@ downloadDir="/Users/ben/Downloads"
 if model == "1":
     filetypes = [('zip files', '.zip')]
     # 请求选择文件
-    answerDir = filedialog.askopenfilename(initialdir=os.getcwd(), title="选择蓝湖下载压缩包:",
-                                           filetypes=filetypes)
+    answerDir = filedialog.askopenfilename(initialdir=os.getcwd(), title="选择蓝湖下载压缩包:",      filetypes=filetypes)
     addImage(answerDir)
 else :
     if model == "2":
@@ -138,9 +141,9 @@ else :
                 time.sleep(50000)
     else:
         imglists = os.listdir(imgDir2)
+        rfile.write("\nimport 'package:flutter/cupertino.dart';\n")
         for img in imglists:
-            imgName=img.split(".")[0]
-            rfile.write("String n"+imgName+"= \"assets/images/"+img+"\";\n")
+            createR(img)
 
 
 
